@@ -28,7 +28,7 @@ import pyspark.pandas as ps
 spark = SparkSession.builder.getOrCreate()
 
 print("Spark version:", spark.version)
-print("pyspark.pandas version:", ps.__version__)
+print("pyspark.pandas version:", ps.sys.version)
 
 print(ps.options.display.max_rows)
 ```
@@ -207,12 +207,13 @@ renamed_df.head()
 - Single and multiple aggregations
 
 ```python
-length_df = shark_incidents_df.groupby("shark_common_name").agg(
-    largest=("shark_length_m", "max"),
-    average=("shark_length_m", "median")
-).sort_values(["average"], ascending=False)
+length_df = (
+    shark_incidents_df.groupby("shark_common_name")
+    .agg(largest=("shark_length_m", "max"), average=("shark_length_m", "median"))
+    .sort_values(["average"], ascending=False)
+)
 
-length_df
+length_df.head()
 ```
 
 ### Joins
@@ -225,7 +226,9 @@ length_df
 - Can use index in merge
 
 ```python
-shark_incidents_df.merge(length_df, how="left", left_on="shark_common_name", right_index=True).head()
+shark_incidents_df.merge(
+    length_df, how="left", left_on="shark_common_name", right_index=True
+).head()
 ```
 
 ### Dates and times
@@ -239,7 +242,15 @@ shark_incidents_df.merge(length_df, how="left", left_on="shark_common_name", rig
 ```python
 shark_incidents_df["incident_day"] = 1
 
-shark_incidents_df["incident_date"] = ps.to_datetime( shark_incidents_df.rename(columns={ "incident_day": "day", "incident_month": "month", "incident_year": "year" })).head()
+shark_incidents_df["incident_date"] = ps.to_datetime(
+    shark_incidents_df.rename(
+        columns={
+            "incident_day": "day",
+            "incident_month": "month",
+            "incident_year": "year",
+        }
+    )
+).head()
 
 shark_incidents_df.head()
 
@@ -258,10 +269,9 @@ shark_incidents_df.dtypes
 - Exercise: ranking within groups
 
 ```python
-shark_incidents_df["length_rank"] = (
-    shark_incidents_df.groupby("shark_common_name")["shark_length_m"]
-      .rank(method="dense", ascending=False)
-)
+shark_incidents_df["length_rank"] = shark_incidents_df.groupby("shark_common_name")[
+    "shark_length_m"
+].rank(method="dense", ascending=False)
 
 shark_incidents_df.head()
 ```
@@ -277,7 +287,9 @@ from pyspark.sql import functions as F
 shark_incidents_sdf = shark_incidents_df.to_spark(index_col="uin")
 shark_incidents_sdf.printSchema()
 
-shark_incidents_extended_sdf = shark_incidents_sdf.withColumn("shark_length_ft", F.col("shark_length_m") * 3.28084)
+shark_incidents_extended_sdf = shark_incidents_sdf.withColumn(
+    "shark_length_ft", F.col("shark_length_m") * 3.28084
+)
 
 shark_incidents_extended_df = shark_incidents_extended_sdf.pandas_api(index_col="uin")
 shark_incidents_extended_df.sort_values("shark_length_m", ascending=False).head()
