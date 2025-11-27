@@ -36,7 +36,7 @@ print(ps.options.display.max_rows)
 ### Why use the Pandas API?
 
 - Scale pandas workloads without major rewrite
-- 1Leverage Spark for parallelism, cluster resources
+- Leverage Spark for parallelism, cluster resources
 - Integrate with Spark SQL, MLlib, Delta Lake
 - Use familiar DataFrame operations without learning PySpark immediately
 
@@ -189,7 +189,6 @@ clean_df.tail()
 - Ascending/descending options
 - Renaming: `df.rename(columns={"old":"new"})`
 - In-place semantics differences
-- Exercise: reformat a messy dataset
 
 ```python
 longest_df = shark_incidents_df.sort_values("shark_length_m", ascending=False)
@@ -236,8 +235,6 @@ shark_incidents_df.merge(
 - Convert using `ps.to_datetime`
 - Extract fields: year, month, day
 - Filtering date ranges
-- Example: time-based grouping
-- Exercise: daily aggregation from timestamped data
 
 ```python
 shark_incidents_df["incident_day"] = 1
@@ -265,8 +262,6 @@ shark_incidents_df.dtypes
 - ranking: rank, dense_rank
 - rolling: rolling mean, rolling sum
 - running totals via cumulative ops
-- Example: compute per-group running sum
-- Exercise: ranking within groups
 
 ```python
 shark_incidents_df["length_rank"] = shark_incidents_df.groupby("shark_common_name")[
